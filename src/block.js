@@ -2,22 +2,31 @@ import CryptoJS from 'crypto-js';
 
 import chain from './chain';
 
-export const calcHash = ({index, prevHash, timestamp, data}) => 0;
+export const calcHash = ({ nonce, index, prevHash, timestamp, data }) => CryptoJS.SHA256(nonce + index + prevHash + timestamp + data).toString();
+
+const diff = 3
 
 export const create = (data) => {
-    const block = { 
-        index: 0,
-        timestamp: 0,
-        data: 'Hello Blockchain!',
-        prevHash: 0,
-        hash: 0
+    const prefix = '0'.repeat(diff);
+    const lastBlock = chain.last()
+    let nonce = 0
+    while (true) {
+        const block = {
+            nonce: nonce,
+            index: lastBlock.index + 1,
+            timestamp: new Date().valueOf(),
+            data: data,
+            prevHash: lastBlock.hash,
+        }
+        block.hash = calcHash(block)
+        if (block.hash.startsWith(prefix)) {
+            return block
+        } else {
+            nonce += 1
+        }
     }
-    // TODO Create block
-    return block
 };
 
 export const isNewBlockValid = (newBlock, prevBlock = chain.last()) => {
-    let isValid = true;
-// TODO compute isValid
-    return isValid;
+    return newBlock.index === prevBlock.index + 1 && newBlock.prevHash === prevBlock.hash && calcHash(newBlock) === newBlock.hash
 };

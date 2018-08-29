@@ -17,9 +17,17 @@ const Chain = (function () { // eslint-disable-line func-names
     const chain = [origin];
 
     function isChainValid(newChain) {
-        let isValid = true;
-        // TODO compute isValid
-        return isValid;
+        return newChain.reduce((ok, current, idx, arr) => {
+            if (!ok) {
+                return ok;
+            } else {
+                if (idx === 0) {
+                    return current.index === 0 && current.hash === calcHash(current)
+                } else {
+                    return isNewBlockValid(current, arr[idx - 1])
+                }
+            }
+        }, true)
     }
 
     function get() {
@@ -27,7 +35,9 @@ const Chain = (function () { // eslint-disable-line func-names
     }
 
     function update(block) {
-        // TODO update chain
+        if (isNewBlockValid(block)) {
+            chain.push(block)
+        }
     }
 
     function last() {
@@ -35,7 +45,12 @@ const Chain = (function () { // eslint-disable-line func-names
     }
 
     function replace(newChain) {
-        // TODO replace new chain
+        if (newChain.length > chain.length && isChainValid(newChain)) {
+            chain.length = 0;
+            newChain.forEach(element => {
+                chain.push(element)
+            });
+        }
     }
 
     function create() {

@@ -28,7 +28,13 @@ router.get('/chain', (req, res) => {
 });
 
 router.post('/mine', (req, res) => {
-    // TODO post mineblock
+    const block = create(req.body.data)
+    
+    chain.update(block)
+    broadcast(responseLatestMsg())
+
+    console.log('Broadcasted block to peers')
+    res.send(block);
 });
 
 
